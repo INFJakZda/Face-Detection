@@ -1,6 +1,8 @@
 import numpy as np
 import cv2
 
+cv2.namedWindow("output", cv2.WINDOW_NORMAL)
+
 face_cascade = cv2.CascadeClassifier('data/face.xml')
 eye_cascade = cv2.CascadeClassifier('data/eye.xml')
 img = cv2.imread('pictures/girl.jpeg')
@@ -13,6 +15,9 @@ for (x,y,w,h) in faces:
     eyes = eye_cascade.detectMultiScale(roi_gray)
     for (ex,ey,ew,eh) in eyes:
         cv2.rectangle(roi_color,(ex,ey),(ex+ew,ey+eh),(0,255,0),2)
-cv2.imshow('img',img)
+
+imS = cv2.resize(img, (320, 445))  
+
+cv2.imshow('img', imS)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
