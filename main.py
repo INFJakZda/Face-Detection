@@ -2,7 +2,7 @@ import cv2
 import os
 import numpy as np
 
-subjects = ["", "Elvis Presley"]
+subjects = ["", "John_Travolta"]    # "Julianne_Moore", "Salma_Hayek", "Silvio_Berlusconi"
 
 def detect_face(img):
 
@@ -42,11 +42,11 @@ def prepare_training_data(data_folder_path):
     for dir_name in dirs:
         
         #ignore any non-relevant directories if any
-        if not dir_name.startswith("s"):
+        if not dir_name.startswith("Jo"):
             continue;
             
         #extract label number of subject from dir_name
-        label = int(dir_name.replace("s", ""))
+        label = 1#int(dir_name.replace("", ""))
         
         #build path of directory containin images for current subject subject
         #sample subject_dir_path = "training-data/s1"
@@ -98,7 +98,7 @@ def prepare_training_data(data_folder_path):
 #one list will contain all the faces
 #and other list will contain respective labels for each face
 print("Preparing data...")
-faces, labels = prepare_training_data("training-data")
+faces, labels = prepare_training_data("pictures")
 print("Data prepared")
 
 #print total faces and labels
@@ -150,7 +150,7 @@ def predict(test_img):
 print("Predicting images...")
 
 #load test images
-test_img1 = cv2.imread("test-data/kuba.jpg")
+test_img1 = cv2.imread("pictures/John_Travolta/John_Travolta_0001.jpg")
 #test_img2 = cv2.imread("test-data/test2.jpg")
 
 #perform a prediction
