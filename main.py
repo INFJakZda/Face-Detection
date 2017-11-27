@@ -150,8 +150,9 @@ def predict(test_img):
 print("Predicting images...")
 
 #load test images
-test_img1 = cv2.imread("pictures/john-travolta.jpg")
-#test_img2 = cv2.imread("test-data/test2.jpg")
+#test_img1 = cv2.imread("pictures/john-travolta.jpg")
+test_img1 = cv2.imread("pictures/julianne-moore.jpg")
+#test_img1 = cv2.imread("pictures/salma_hayek.jpg")
 
 #perform a prediction
 predicted_img1 = predict(test_img1)
