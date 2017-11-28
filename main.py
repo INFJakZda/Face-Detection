@@ -78,23 +78,25 @@ def predict(test_img):
     return img
 
 
-print("Predicting images...")
-
 #test_img1 = cv2.imread("pictures/john-travolta.jpg")
 #test_img1 = cv2.imread("pictures/julianne-moore.jpg")
 #test_img1 = cv2.imread("pictures/salma_hayek.jpg")
 
-p = subprocess.Popen("pictures/webcam.py")
-p.wait()
-time.sleep(2)
+while True:
+    print("Predicting images...")
+    
+    p = subprocess.Popen("pictures/webcam.py")
+    p.wait()
+    time.sleep(2)
 
-test_img1 = cv2.imread("pictures/simplecv.png")
+    test_img1 = cv2.imread("pictures/simplecv.png")
 
 
-predicted_img1 = predict(test_img1)
-print("Prediction complete")
+    predicted_img1 = predict(test_img1)
+    print("Prediction complete")
 
-
-cv2.imshow(subjects[1], cv2.resize(predicted_img1, (400, 500)))
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+    cv2.namedWindow("image", cv2.WINDOW_NORMAL)
+    cv2.imshow("image", predicted_img1)#cv2.resize(predicted_img1, (400, 500)))
+    cv2.waitKey(200)
+    time.sleep(1)
+    cv2.destroyAllWindows()
