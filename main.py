@@ -1,5 +1,7 @@
 import cv2
 import os
+import subprocess
+import time
 import numpy as np
 
 subjects = ["", "John_Travolta", "Julianne_Moore", "Salma_Hayek", "Silvio_Berlusconi"]
@@ -80,7 +82,13 @@ print("Predicting images...")
 
 #test_img1 = cv2.imread("pictures/john-travolta.jpg")
 #test_img1 = cv2.imread("pictures/julianne-moore.jpg")
-test_img1 = cv2.imread("pictures/salma_hayek.jpg")
+#test_img1 = cv2.imread("pictures/salma_hayek.jpg")
+
+p = subprocess.Popen("pictures/webcam.py")
+p.wait()
+time.sleep(2)
+
+test_img1 = cv2.imread("pictures/simplecv.png")
 
 
 predicted_img1 = predict(test_img1)
