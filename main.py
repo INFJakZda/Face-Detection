@@ -4,7 +4,12 @@ import subprocess
 import time
 import numpy as np
 
-subjects = ["", "John_Travolta", "Julianne_Moore", "Salma_Hayek", "Silvio_Berlusconi", "Zdano"]
+import pygame
+import pygame.camera
+import pygame.image
+from pygame.locals import *
+
+subjects = ["", "John_Travolta", "Julianne_Moore", "Salma_Hayek", "Silvio_Berlusconi"]
 
 def detect_face(img):
 
@@ -64,14 +69,17 @@ def draw_text(img, text, x, y):
 def predict(test_img):
     img = test_img.copy()
     faces, rect = detect_face(img)
-    for it in range(len(faces)):
-        label, confidence = face_recognizer.predict(faces[it])
-        label_text = subjects[label]
+    try:
+        for it in range(len(faces)):
+            label, confidence = face_recognizer.predict(faces[it])
+            label_text = subjects[label]
+        
+            draw_rectangle(img, rect[it])
+            draw_text(img, label_text, rect[it][0], rect[it][1]-5)
     
-        draw_rectangle(img, rect[it])
-        draw_text(img, label_text, rect[it][0], rect[it][1]-5)
-    
-    return img
+            return img
+    except:
+        return test_img
 
 if __name__ == '__main__':
     print("Preparing data...")
@@ -84,14 +92,40 @@ if __name__ == '__main__':
     face_recognizer = cv2.face.LBPHFaceRecognizer_create()
     face_recognizer.train(faces, np.array(labels))
 
-    test_img1 = cv2.imread("pictures/salma-travolta-hayek.png")
+    #test_img1 = cv2.imread("pictures/salma-travolta-hayek.png")
+    #print("Predicting images...")
+    #predicted_img1 = predict(test_img1)
+    #print("Prediction complete")
+    #cv2.namedWindow("image", cv2.WINDOW_NORMAL)
+    #cv2.imshow("image", predicted_img1)
+    #cv2.waitKey(0)
+    #cv2.destroyAllWindows()
     
-    print("Predicting images...")
+    pygame.init()
+    pygame.camera.init()
+    display = pygame.display.set_mode((640, 480), 0)
+    cam = pygame.camera.Camera(pygame.camera.list_cameras()[0])
+    cam.start()
+    screen = pygame.surface.Surface((640, 480), 0, display)
+    capture = True
 
-    predicted_img1 = predict(test_img1)
-    print("Prediction complete")
+    while capture:
+        screen = cam.get_image(screen)
+        
+        pygame.image.save(screen, "pictures/img.png")
+        #time.sleep(0.1)
+        test_img = cv2.imread("pictures/img.png")
+        predicted_img = predict(test_img)
+        cv2.imwrite("pictures/img.png", predicted_img)
+        #time.sleep(0.1)
+        img = pygame.image.load("pictures/img.png")
+        
+        display.blit(img, (0, 0))
+        pygame.display.flip()
+        
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                capture = False
 
-    cv2.namedWindow("image", cv2.WINDOW_NORMAL)
-    cv2.imshow("image", predicted_img1)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    pygame.camera.quit()
+    os.remove("pictures/img.png")
