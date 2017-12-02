@@ -1,11 +1,12 @@
-#!/usr/bin/python2
-# DO: chmod +x webcam.py
-
+import pygame.camera
+import pygame.image
 import time
-from SimpleCV import Camera # Install: sudo pip install simplecv, python2
 
+pygame.camera.init()
+cam = pygame.camera.Camera(pygame.camera.list_cameras()[0])
+cam.start()
+time.sleep(0.4)
+img = cam.get_image()
 
-cam = Camera()
-time.sleep(0.1)
-img = cam.getImage()
-img.save("simplecv.png")
+pygame.image.save(img, "img.jpg")
+pygame.camera.quit()
