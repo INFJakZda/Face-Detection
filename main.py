@@ -9,7 +9,7 @@ import pygame.camera
 import pygame.image
 from pygame.locals import *
 
-subjects = ["", "John_Travolta", "Julianne_Moore", "Salma_Hayek", "Silvio_Berlusconi"]
+subjects = ["", "John_Travolta", "Julianne_Moore", "Salma_Hayek", "Silvio_Berlusconi", "Zdano", "Reszelo"]
 
 def detect_face(img):
 
@@ -69,17 +69,15 @@ def draw_text(img, text, x, y):
 def predict(test_img):
     img = test_img.copy()
     faces, rect = detect_face(img)
-    try:
+    if(faces != None):
         for it in range(len(faces)):
             label, confidence = face_recognizer.predict(faces[it])
             label_text = subjects[label]
         
             draw_rectangle(img, rect[it])
             draw_text(img, label_text, rect[it][0], rect[it][1]-5)
-    
-            return img
-    except:
-        return test_img
+
+    return img
 
 if __name__ == '__main__':
     print("Preparing data...")
