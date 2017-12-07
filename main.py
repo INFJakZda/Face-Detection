@@ -9,6 +9,8 @@ import pygame.camera
 import pygame.image
 from pygame.locals import *
 
+from PIL import Image
+
 subjects = ["", "John_Travolta", "Julianne_Moore", "Salma_Hayek", "Silvio_Berlusconi", "Zdano", "Reszelo"]
 
 def detect_face(img):
@@ -109,14 +111,14 @@ if __name__ == '__main__':
 
     while capture:
         screen = cam.get_image(screen)
-        
-        pygame.image.save(screen, "pictures/img.png")
-        #time.sleep(0.1)
-        test_img = cv2.imread("pictures/img.png")
+
+        pil_img = pygame.image.tostring(screen, "RGBA", False)
+        test_img = Image.frombytes("RGBA",(640,480), pil_img)
+        test_img = cv2.cvtColor(np.array(test_img), cv2.COLOR_RGB2BGR)
+       
         predicted_img = predict(test_img)
-        cv2.imwrite("pictures/img.png", predicted_img)
-        #time.sleep(0.1)
-        img = pygame.image.load("pictures/img.png")
+        
+        img = pygame.image.frombuffer(predicted_img.tostring(), predicted_img.shape[1::-1], "RGB")
         
         display.blit(img, (0, 0))
         pygame.display.flip()
@@ -126,4 +128,3 @@ if __name__ == '__main__':
                 capture = False
 
     pygame.camera.quit()
-    os.remove("pictures/img.png")
