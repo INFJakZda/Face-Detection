@@ -17,7 +17,7 @@ def detect_face(img):
 
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     face_cascade = cv2.CascadeClassifier('data/face.xml')
-    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=5);
+    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=5)
 
     cord_list = []  #rectangle cordinates list
 
@@ -47,8 +47,6 @@ def prepare_training_data(data_folder_path):
                 continue;
             image_path = subject_dir_path + "/" + image_name
             image = cv2.imread(image_path)
-            cv2.imshow("Training on image...", cv2.resize(image, (400, 500)))
-            cv2.waitKey(100)
             face, rect = detect_face(image)
 
             if face is not None:
@@ -66,7 +64,22 @@ def draw_rectangle(img, rect):
     cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
     
 def draw_text(img, text, x, y):
-    cv2.putText(img, text, (x, y), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 255, 0), 2)
+    cv2.putText(img, text, (x, y), cv2.FONT_HERSHEY_PLAIN, 0.3, (0, 255, 0), 1)
+
+def detec_other_smtf(img):
+    smile_cascade = cv2.CascadeClassifier('data/smile.xml')
+    face_cascade = cv2.CascadeClassifier('data/face.xml')
+    gray = img
+    
+    face = face_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=5)
+    for (x,y,w,h) in face:
+        roi_gray = gray[y:y+h, x:x+w]
+        roi_color = img[y:y+h, x:x+w]
+        smile = smile_cascade.detectMultiScale(roi_gray)
+        for (ex,ey,ew,eh) in smile:
+            cv2.rectangle(roi_color,(ex,ey),(ex+ew,ey+eh),(241,255,24), 2)
+    
+    return img
 
 def predict(test_img):
     img = test_img.copy()
@@ -79,7 +92,7 @@ def predict(test_img):
             draw_rectangle(img, rect[it])
             draw_text(img, label_text, rect[it][0], rect[it][1]-5)
 
-    return img
+    return detec_other_smtf(img)
 
 if __name__ == '__main__':
     print("Preparing data...")
@@ -92,15 +105,6 @@ if __name__ == '__main__':
     face_recognizer = cv2.face.LBPHFaceRecognizer_create()
     face_recognizer.train(faces, np.array(labels))
 
-    #test_img1 = cv2.imread("pictures/salma-travolta-hayek.png")
-    #print("Predicting images...")
-    #predicted_img1 = predict(test_img1)
-    #print("Prediction complete")
-    #cv2.namedWindow("image", cv2.WINDOW_NORMAL)
-    #cv2.imshow("image", predicted_img1)
-    #cv2.waitKey(0)
-    #cv2.destroyAllWindows()
-    
     pygame.init()
     pygame.camera.init()
     display = pygame.display.set_mode((640, 480), 0)
