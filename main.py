@@ -11,7 +11,7 @@ from pygame.locals import *
 
 from PIL import Image
 
-subjects = ["", "John_Travolta", "Julianne_Moore", "Salma_Hayek", "Silvio_Berlusconi", "Zdano", "Reszelo"]
+subjects = ["", "John_Travolta", "Julianne_Moore", "Salma_Hayek", "Silvio_Berlusconi", "Zdano", "Reszelo", "huj", "debil"]
 
 def detect_face(img):
 
@@ -66,21 +66,6 @@ def draw_rectangle(img, rect):
 def draw_text(img, text, x, y):
     cv2.putText(img, text, (x, y), cv2.FONT_HERSHEY_PLAIN, 0.3, (0, 255, 0), 1)
 
-def detec_other_smtf(img):
-    smile_cascade = cv2.CascadeClassifier('data/smile.xml')
-    face_cascade = cv2.CascadeClassifier('data/face.xml')
-    gray = img
-    
-    face = face_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=5)
-    for (x,y,w,h) in face:
-        roi_gray = gray[y:y+h, x:x+w]
-        roi_color = img[y:y+h, x:x+w]
-        smile = smile_cascade.detectMultiScale(roi_gray)
-        for (ex,ey,ew,eh) in smile:
-            cv2.rectangle(roi_color,(ex,ey),(ex+ew,ey+eh),(241,255,24), 2)
-    
-    return img
-
 def predict(test_img):
     img = test_img.copy()
     faces, rect = detect_face(img)
@@ -92,7 +77,7 @@ def predict(test_img):
             draw_rectangle(img, rect[it])
             draw_text(img, label_text, rect[it][0], rect[it][1]-5)
 
-    return detec_other_smtf(img)
+    return img
 
 if __name__ == '__main__':
     print("Preparing data...")
