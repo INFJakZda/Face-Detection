@@ -11,7 +11,9 @@ from pygame.locals import *
 
 from PIL import Image
 
-subjects = ["", "John_Travolta", "Julianne_Moore", "Salma_Hayek", "Silvio_Berlusconi", "Zdano", "Reszelo", "huj", "debil"]
+import pickle
+
+subjects = ["", "John_Travolta", "Julianne_Moore", "Salma_Hayek", "Silvio_Berlusconi", "a", "b", "c", "d"]
 
 def detect_face(img):
 
@@ -31,31 +33,42 @@ def detect_face(img):
     return cord_list, faces
 
 def prepare_training_data(data_folder_path):
-    
     dirs = os.listdir(data_folder_path)
     faces = []
     labels = []
     
-    for dir_name in dirs:
-        if not dir_name.startswith("s"):
-            continue;
-        label = int(dir_name.replace("s", ""))
-        subject_dir_path = data_folder_path + "/" + dir_name
-        subject_images_names = os.listdir(subject_dir_path)
-        for image_name in subject_images_names:
-            if image_name.startswith("."):
+    if os.path.isfile('training-data/ptd_faces.data'):
+        with open('training-data/ptd_faces.data', 'rb') as f:
+            faces = pickle.load(f)
+        with open('training-data/ptd_labels.data', 'rb') as f:
+            labels = pickle.load(f)    
+    else:
+        for dir_name in dirs:
+            if not dir_name.startswith("s"):
                 continue;
-            image_path = subject_dir_path + "/" + image_name
-            image = cv2.imread(image_path)
-            face, rect = detect_face(image)
+            label = int(dir_name.replace("s", ""))
+            subject_dir_path = data_folder_path + "/" + dir_name
+            subject_images_names = os.listdir(subject_dir_path)
+            for image_name in subject_images_names:
+                if image_name.startswith("."):
+                    continue;
+                image_path = subject_dir_path + "/" + image_name
+                image = cv2.imread(image_path)
+                face, rect = detect_face(image)
 
-            if face is not None:
-                faces.append(face[0])
-                labels.append(label)
-            
-    cv2.destroyAllWindows()
-    cv2.waitKey(1)
-    cv2.destroyAllWindows()
+                if face is not None:
+                    faces.append(face[0])
+                    labels.append(label)
+                
+        cv2.destroyAllWindows()
+        cv2.waitKey(1)
+        cv2.destroyAllWindows()
+        
+        with open('training-data/ptd_faces.data', 'wb+') as f:
+            pickle.dump(faces, f)
+        with open('training-data/ptd_labels.data', 'wb+') as f:
+            pickle.dump(labels, f)
+        
     
     return faces, labels
 
