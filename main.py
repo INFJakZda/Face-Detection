@@ -15,22 +15,25 @@ import pickle
 
 subjects = ["", "John_Travolta", "Julianne_Moore", "Salma_Hayek", "Silvio_Berlusconi", "a", "b", "c", "d"]
 
-def detect_face(img):
+
+def detect_face(img):   #z obrazka wycina twarze kolorowe i ich współrzedne i zwraca w liscie [(twarz, wspolrzedne), ....]
 
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    
     face_cascade = cv2.CascadeClassifier('data/face.xml')
-    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=5)
+    cord_list = face_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=5)
 
-    cord_list = []  #rectangle cordinates list
+    faces = []  
 
-    if (len(faces) == 0):
+    if (len(cord_list) == 0):
         return None, None
 
-    for it in range(len(faces)):
-        (x, y, w, h) = faces[it]
-        cord_list.append(gray[y:y+w, x:x+h])
+    for it in range(len(cord_list)):
+        (x, y, w, h) = cord_list[it]
+        faces.append(gray[y:y+w, x:x+h])
 
-    return cord_list, faces
+    return faces, cord_list
+
 
 def prepare_training_data(data_folder_path):
     dirs = os.listdir(data_folder_path)
@@ -92,6 +95,28 @@ def predict(test_img):
 
     return img
 
+def detect_eye(image, cords):   #na całym obrazku rysuje obrys oczu dla kazdej wykrytej twarzy
+
+    (x, y, w, h) = cords
+    
+    face = image.copy()      
+    face[y:y+int(w/3.3), x:x+h] = (255,255,255)
+    face[y+int(w/2.1):y+w, x:x+h] = (255,255,255)
+    face[y:y+w, x:x+int(h/5)] = (255,255,255)
+    face[y:y+w, x+(h-int(h/5)):x+h] = (255,255,255)  
+
+    imgray = cv2.cvtColor(face[y:y+w, x:x+h], cv2.COLOR_BGR2GRAY)
+    ret, thresh = cv2.threshold(imgray, 127, 255, 0)
+    image2, contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    
+    image[y:y+w, x:x+h] = cv2.drawContours(image[y:y+w, x:x+h], contours, -1, (100,255,100), 1)
+
+    #cv2.imshow("image",  image)
+    #cv2.waitKey(0)
+    #cv2.destroyAllWindows()
+    
+    return image     
+
 if __name__ == '__main__':
     print("Preparing data...")
     faces, labels = prepare_training_data("training-data")
@@ -116,11 +141,16 @@ if __name__ == '__main__':
 
         pil_img = pygame.image.tostring(screen, "RGBA", False)
         test_img = Image.frombytes("RGBA",(640,480), pil_img)
-        test_img = cv2.cvtColor(np.array(test_img), cv2.COLOR_RGB2BGR)
+        test_img = cv2.cvtColor(np.array(cv2.cvtColor(np.array(test_img), cv2.COLOR_RGB2BGR)), cv2.COLOR_BGR2RGB)
        
-        predicted_img = predict(test_img)
+        #predicted_img = predict(test_img)
+        faces, cords = detect_face(test_img)
+        if(faces != None):
+            for it in range(len(faces)):
+                test_img = detect_eye(test_img, cords[it])
         
-        img = pygame.image.frombuffer(predicted_img.tostring(), predicted_img.shape[1::-1], "RGB")
+        #img = pygame.image.frombuffer(predicted_img.tostring(), predicted_img.shape[1::-1], "RGB")
+        img = pygame.image.frombuffer(test_img.tostring(), test_img.shape[1::-1], "RGB")
         
         display.blit(img, (0, 0))
         pygame.display.flip()
@@ -129,4 +159,4 @@ if __name__ == '__main__':
             if event.type == QUIT:
                 capture = False
 
-    pygame.camera.quit()
+    pygame.camera.quit()  
