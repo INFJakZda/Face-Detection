@@ -13,8 +13,6 @@ from PIL import Image
 
 import pickle
 
-import math
-
 subjects = ["", "John_Travolta", "Julianne_Moore", "Salma_Hayek", "Silvio_Berlusconi", "a", "b", "c", "d"]
 
 
@@ -114,6 +112,28 @@ def detect_eye(image, cords):   #na całym obrazku rysuje obrys oczu dla kazdej 
     image[y:y+w, x:x+h] = cv2.drawContours(image[y:y+w, x:x+h], contours, -1, (100,255,100), 1)
     return image     
 
+def my_selective_search(img):
+    # Selective search for object detection
+    # The location of the objects is given by
+    # the location of the image patches where
+    # the class probability returned by the object recognition alg is high.
+    cv2.setUseOptimized(True)
+    cv2.setNumThreads(24)
+    algSerch = cv2.ximgproc.segmentation.createSelectiveSearchSegmentation()
+    algSerch.setBaseImage(test_img)
+    
+    # Single strategy
+    algSerch.switchToSingleStrategy()
+    run_alg = algSerch.process()
+    
+    # Number of region proposals to show
+    nb_rects = 5
+    
+    # Iterative over all the region proposal
+    for i in range(len(run_alg)):
+        if i<nb_rects:
+            x, y, w, h = run_alg[i]
+            cv2.rectangle(test_img, (x,y), (x+w,y+h), (0,0,255), 1, cv2.LINE_AA)
 
 if __name__ == '__main__':
     print("Preparing data...")
@@ -146,6 +166,8 @@ if __name__ == '__main__':
         if(faces != None):
             for it in range(len(faces)):
                 test_img = detect_eye(test_img, cords[it])
+        elif(faces == None):
+            my_selective_search(test_img)
         
         test_img = cv2.cvtColor(np.array(test_img), cv2.COLOR_BGR2RGB)
         
